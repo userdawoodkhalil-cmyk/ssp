@@ -283,6 +283,13 @@ button:hover {
 
 <body>
 
+  <h2>Login</h2>
+
+<input id="email" placeholder="Email"><br><br>
+<input id="password" type="password" placeholder="Password"><br><br>
+
+<button onclick="login()">Login</button>
+
 <div id="cursorGlow"></div>
 
 <!-- ✨ GLITTER CONTAINER -->
@@ -338,6 +345,22 @@ for (let i = 0; i < 40; i++) {
 
 <!-- ⚠️ YOUR SCRIPT (UNCHANGED) -->
 <script type="module">
+function login() {
+  let email = document.getElementById("email").value;
+  let password = document.getElementById("password").value;
+
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+
+  let found = users.find(u => u.email === email && u.password === password);
+
+  if(found) {
+    localStorage.setItem("loggedIn", email);
+    window.location.href = "dashboard.html";
+  } else {
+    alert("Wrong email or password");
+  }
+}
+  
 import {
   auth,
   createUserWithEmailAndPassword,
