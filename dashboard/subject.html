@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chapters</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/theme.js"></script>
+
+<style>
+body { font-family: Arial; padding: 20px; }
+.card {
+    padding: 15px;
+    border-radius: 10px;
+    width: 230px;
+    background-color: #f5f5f5;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    display: inline-block;
+    margin: 10px;
+}
+button {
+    margin-top: 5px;
+    padding: 6px 10px;
+}
+</style>
+</head>
+<body>
+
+<h1 id="subject-title"></h1>
+
+<!-- 🔥 START QUIZ BUTTON -->
+<button id="startQuizBtn" style="background:#28a745;color:white;">
+    ▶ Start Full Quiz
+</button>
+
+<div id="chapters-container"></div>
+
+<script type="module">
+import { db, doc, getDoc } from "../assets/js/firebase.js";
+
+const user = localStorage.getItem("currentUser");
+if (!user) window.location.href = "../index.html";
+
+const urlParams = new URLSearchParams(window.location.search);
+const subject = urlParams.get("subject");
+
+if (!subject) window.location.href = "dashboard.html";
+
+document.getElementById("subject-title").textContent = subject;
+
+// 🔥 Quiz Button Link
+document.getElementById("startQuizBtn").onclick = () => {
+    window.location.href = `quiz.html?subject=${encodeURIComponent(subject)}`;
+};
+
+async function loadChapters() {
+    const subjects = await (await fetch("../assets/data/subject.json")).json();
+
+    if (!subjects[subject]) {
+        document.body.innerHTML = "<h2>No chapters found</h2>";
+        return;
+    }
+
+    const chapters = subjects[subject];
+
+    const userRef = doc(db, "users", user);
+    const snap = await getDoc(userRef);
+    const userData = snap.data() || {};
+    const progress = userData.progress || {};
+
+    const container = document.getElementById("chapters-container");
+    container.innerHTML = "";
+
+    Object.keys(chapters).forEach(chap => {
+        let totalTopics = chapters[chap].length;
+        let completedTopics = chapters[chap].reduce((acc, _, idx) => {
+            const key = `${subject}-${chap}-${idx}`;
+            return acc + (progress[key] ? 1 : 0);
+        }, 0);
+
+        const percent = totalTopics ? Math.round((completedTopics / totalTopics) * 100) : 0;
+
+        const div = document.createElement("div");
+        div.className = "card";
+
+        div.innerHTML = `
+            <h3>${chap}</h3>
+            <p>${completedTopics}/${totalTopics} Completed (${percent}%)</p>
+            <button onclick="window.location.href='topics.html?subject=${encodeURIComponent(subject)}&chapter=${encodeURIComponent(chap)}'">
+                Open Topics
+            </button>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+loadChapters();
+</script>
+
+</body>
+</html>

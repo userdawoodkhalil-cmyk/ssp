@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Smart Revision</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/theme.js"></script>
+
+<style>
+body { font-family: Arial; padding: 20px; }
+
+.card {
+    background: #f5f5f5;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.weak { border-left: 5px solid red; }
+.normal { border-left: 5px solid orange; }
+
+button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background: #28a745;
+    color: white;
+}
+
+</style>
+</head>
+<body>
+
+<h1>🔄 Smart Revision</h1>
+<h3 id="count">Loading...</h3>
+
+<div id="revision-container"></div>
+
+<script type="module">
+import { db, doc, getDoc, setDoc } from "../assets/js/firebase.js";
+
+// 🔐 Check login
+const user = localStorage.getItem("currentUser");
+if (!user) window.location.href = "../index.html";
+
+const userRef = doc(db, "users", user);
+
+async function loadRevision() {
+    try {
+        // Load data together (fast)
+        const [subjectsRes, userSnap] = await Promise.all([
+            fetch("../assets/data/subjects.json"),
+            getDoc(userRef)
+        ]);
+
+        const subjects = await subjectsRes.json();
+        const userData = userSnap.data() || {};
+
+        const progress = userData.progress || {};
+        const weakTopics = userData.weakTopics || {};
+
+        let revisionList = [];
+
+        // 🔥 Build list
+        Object.keys(subjects).forEach(subj => {
+            Object.keys(subjects[subj]).forEach(chap => {
+                subjects[subj][chap].forEach((topic, idx) => {
+                    const key = `${subj}-${chap}-${idx}`;
+
+                    if (weakTopics[key]) {
+                        revisionList.push({
+                            key,
+                            topic,
+                            subject: subj,
+                            chapter: chap,
+                            type: "weak"
+                        });
+                    } else if (!progress[key]) {
+                        revisionList.push({
+                            key,
+                            topic,
+                            subject: subj,
+                            chapter: chap,
+                            type: "normal"
+                        });
+                    }
+                });
+            });
+        });
+
+        // 🔥 Sort (weak first)
+        revisionList.sort((a, b) => {
+            if (a.type === "weak" && b.type !== "weak") return -1;
+            if (a.type !== "weak" && b.type === "weak") return 1;
+            return 0;
+        });
+
+        const container = document.getElementById("revision-container");
+        const countEl = document.getElementById("count");
+
+        container.innerHTML = "";
+        countEl.textContent = "Topics to revise: " + revisionList.length;
+
+        if (revisionList.length === 0) {
+            container.innerHTML = "<h2>🎉 All topics completed!</h2>";
+            return;
+        }
+
+        revisionList.forEach((item, index) => {
+            const div = document.createElement("div");
+            div.className = "card " + (item.type === "weak" ? "weak" : "normal");
+
+            div.innerHTML = `
+                <div>
+                    <b>${item.topic}</b><br>
+                    <small>${item.subject} → ${item.chapter}</small>
+                </div>
+                <button>Mark as Revised</button>
+            `;
+
+            const btn = div.querySelector("button");
+
+            btn.onclick = async () => {
+                // Update Firebase data
+                progress[item.key] = true;
+                delete weakTopics[item.key];
+
+                await setDoc(userRef, {
+                    progress: progress,
+                    weakTopics: weakTopics
+                });
+
+                // Remove UI
+                div.remove();
+
+                // Update count properly
+                const remaining = document.querySelectorAll(".card").length;
+                countEl.textContent = "Topics to revise: " + remaining;
+            };
+
+            container.appendChild(div);
+        });
+
+    } catch (err) {
+        console.error(err);
+        document.getElementById("revision-container").innerHTML =
+            "<h2>❌ Error loading revision</h2>";
+    }
+}
+
+// Start
+loadRevision();
+</script>
+
+</body>
+</html>

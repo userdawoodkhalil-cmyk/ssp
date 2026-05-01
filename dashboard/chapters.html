@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chapters</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/theme.js"></script>
+<style>
+.card { padding: 15px; border-radius: 10px; width: 220px; background-color: #f5f5f5; box-shadow: 0 2px 6px rgba(0,0,0,0.2); display: inline-block; margin: 10px; }
+</style>
+</head>
+<body>
+
+<h1 id="subject-title"></h1>
+<div id="chapters-container"></div>
+
+<script type="module">
+import { db, doc, getDoc } from "../assets/js/firebase.js";
+
+const user = localStorage.getItem("currentUser");
+if (!user) window.location.href = "../index.html";
+
+const urlParams = new URLSearchParams(window.location.search);
+const subject = urlParams.get("subject");
+
+if (!subject) window.location.href = "dashboard.html";
+
+document.getElementById("subject-title").textContent = subject;
+
+async function loadChapters() {
+    const subjects = await (await fetch("../assets/data/subject.json")).json();
+    const chapters = subjects[subject];
+    const userRef = doc(db, "users", user);
+    const snap = await getDoc(userRef);
+    const userData = snap.data() || {};
+    const progress = userData.progress || {};
+
+    const container = document.getElementById("chapters-container");
+    container.innerHTML = "";
+
+    Object.keys(chapters).forEach(chap => {
+        let totalTopics = chapters[chap].length;
+        let completedTopics = chapters[chap].reduce((acc, _, idx) => {
+            const key = `${subject}-${chap}-${idx}`;
+            return acc + (progress[key] ? 1 : 0);
+        }, 0);
+        const percent = totalTopics ? Math.round((completedTopics / totalTopics) * 100) : 0;
+
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `
+            <h3>${chap}</h3>
+            <p>Topics Completed: ${completedTopics}/${totalTopics} (${percent}%)</p>
+            <button onclick="window.location.href='topics.html?subject=${encodeURIComponent(subject)}&chapter=${encodeURIComponent(chap)}'">Open Chapter</button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+loadChapters();
+</script>
+
+</body>
+</html>

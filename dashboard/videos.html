@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Learning Videos</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#0b1220;
+color:white;
+}
+
+.top{
+padding:10px;
+background:#0f172a;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+input{
+padding:10px;
+width:70%;
+}
+
+button{
+padding:10px;
+cursor:pointer;
+}
+
+.container{
+padding:10px;
+}
+
+.video{
+margin-top:10px;
+}
+
+iframe{
+width:100%;
+height:300px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="top">
+<h3>🎥 AI Video Learning</h3>
+<button onclick="back()">⬅ Back</button>
+</div>
+
+<div class="container">
+
+<input id="query" placeholder="Search topic...">
+<button onclick="search()">Search</button>
+
+<div id="results"></div>
+
+</div>
+
+<script>
+
+function back(){
+window.location.href="index.html";
+}
+
+async function search(){
+let q=document.getElementById("query").value;
+
+let res=await fetch("/youtube",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({query:q})
+});
+
+let data=await res.json();
+
+let box=document.getElementById("results");
+box.innerHTML="";
+
+data.videos.forEach(v=>{
+let div=document.createElement("div");
+div.className="video";
+
+div.innerHTML=`
+<h4>${v.title}</h4>
+<iframe src="https://www.youtube.com/embed/${v.videoId}" frameborder="0"></iframe>
+`;
+
+box.appendChild(div);
+});
+}
+
+</script>
+
+</body>
+</html>

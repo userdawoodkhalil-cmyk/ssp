@@ -1,0 +1,33 @@
+{
+  "Physics": {
+    "Chapter 1": [
+      {
+        "q": "What is SI unit of force?",
+        "options": ["Newton", "Joule", "Watt", "Pascal"],
+        "answer": 0
+      },
+      {
+        "q": "Who discovered gravity?",
+        "options": ["Newton", "Einstein", "Galileo", "Tesla"],
+        "answer": 0
+      }
+    ],
+    "Chapter 2": [
+      {
+        "q": "Speed is?",
+        "options": ["Distance/Time", "Time/Distance", "Mass/Volume", "Force/Area"],
+        "answer": 0
+      }
+    ]
+  },
+
+  "Chemistry": {
+    "Chapter 1": [
+      {
+        "q": "H2O is?",
+        "options": ["Oxygen", "Hydrogen", "Water", "Helium"],
+        "answer": 2
+      }
+    ]
+  }
+}

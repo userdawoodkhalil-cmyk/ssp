@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI School GOD MODE</title>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<style>
+
+/* ===== GLOBAL ===== */
+body{
+margin:0;
+font-family:Segoe UI;
+background:linear-gradient(135deg,#0f172a,#020617);
+color:white;
+display:flex;
+height:100vh;
+overflow:hidden;
+}
+
+/* ===== GLASS EFFECT ===== */
+.glass{
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,0.1);
+border-radius:12px;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+width:260px;
+padding:12px;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+/* INPUT */
+input{
+padding:10px;
+border:none;
+border-radius:8px;
+background:#1e293b;
+color:white;
+}
+
+/* BUTTON */
+button{
+padding:10px;
+border:none;
+border-radius:8px;
+background:linear-gradient(135deg,#3b82f6,#6366f1);
+color:white;
+cursor:pointer;
+transition:0.2s;
+}
+
+button:hover{
+transform:scale(1.05);
+box-shadow:0 0 10px #3b82f6;
+}
+
+/* ===== MAIN ===== */
+.main{
+flex:1;
+display:flex;
+flex-direction:column;
+padding:10px;
+gap:10px;
+}
+
+/* ===== HEADER ===== */
+.header{
+display:flex;
+justify-content:space-between;
+padding:10px;
+}
+
+/* ===== GRID ===== */
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+flex:1;
+}
+
+/* ===== BOX ===== */
+.box{
+padding:10px;
+overflow:auto;
+}
+
+/* ===== CHAT ===== */
+.chat{
+height:200px;
+overflow-y:auto;
+display:flex;
+flex-direction:column;
+gap:6px;
+}
+
+/* CHAT BUBBLES */
+.msg{
+padding:8px;
+border-radius:10px;
+max-width:70%;
+animation:fadeIn 0.3s ease;
+}
+
+.self{
+background:#3b82f6;
+align-self:flex-end;
+}
+
+.other{
+background:#1e293b;
+align-self:flex-start;
+}
+
+/* ===== PLAYERS ===== */
+.player{
+padding:6px;
+background:#1e293b;
+border-radius:6px;
+margin:4px 0;
+}
+
+/* ===== QUIZ BUTTON ===== */
+.quiz-btn{
+margin-top:5px;
+padding:8px;
+background:#2563eb;
+border-radius:6px;
+cursor:pointer;
+}
+
+.quiz-btn:hover{
+background:#1d4ed8;
+}
+
+/* ===== ANIMATION ===== */
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(10px);}
+to{opacity:1;transform:translateY(0);}
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar glass">
+
+<input id="nameInput" placeholder="Enter name">
+<button onclick="login()">Login</button>
+
+<input id="friendInput" placeholder="Add friend">
+<button onclick="addFriend()">Add Friend</button>
+
+<div class="glass box" id="friendsBox">No friends</div>
+
+<button onclick="createRoom()">Create Room</button>
+<input id="roomInput" placeholder="Room ID">
+<button onclick="joinRoom()">Join Room</button>
+
+<button onclick="startQuiz()">Start Quiz</button>
+
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<div class="header glass">
+<div>Room: <span id="roomLabel">None</span></div>
+<div>🔥 AI School GOD MODE</div>
+</div>
+
+<div class="grid">
+
+<!-- QUESTION -->
+<div class="box glass">
+<h3>📘 Question</h3>
+<div id="questionBox">No Question Yet</div>
+<div id="answersBox"></div>
+</div>
+
+<!-- PLAYERS -->
+<div class="box glass">
+<h3>👥 Players</h3>
+<div id="playersBox"></div>
+</div>
+
+<!-- CHAT -->
+<div class="box glass" style="grid-column:span 2;">
+<h3>💬 Chat</h3>
+
+<div id="chatBox" class="chat"></div>
+
+<div style="display:flex;gap:5px;margin-top:5px;">
+<input id="chatInput" placeholder="Type message..." style="flex:1;">
+<button onclick="sendChat()">Send</button>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const socket = io("http://localhost:3000");
+
+let room=null;
+let username="";
+
+// LOGIN
+function login(){
+username = nameInput.value.trim();
+if(!username) return alert("Enter name");
+
+socket.emit("login",username);
+socket.emit("getFriends");
+}
+
+// FRIENDS
+function addFriend(){
+let f=friendInput.value.trim();
+if(!f) return;
+socket.emit("addFriend",f);
+friendInput.value="";
+}
+
+socket.on("friendList",(list)=>{
+friendsBox.innerHTML = list.map(f=>`
+<div class="player">👤 ${f}</div>
+`).join("");
+});
+
+// ROOM
+function createRoom(){
+socket.emit("createRoom",username);
+}
+
+function joinRoom(){
+room = roomInput.value.trim();
+if(!room) return alert("Enter room");
+
+socket.emit("joinRoom",{roomId:room,name:username});
+roomLabel.innerText=room;
+}
+
+socket.on("roomCreated",(id)=>{
+room=id;
+roomLabel.innerText=id;
+});
+
+// PLAYERS
+socket.on("playersUpdate",(players)=>{
+playersBox.innerHTML = players.map(p=>`
+<div class="player">${p.name} ⭐ ${p.score}</div>
+`).join("");
+});
+
+// QUIZ
+function startQuiz(){
+if(!room) return alert("Join room first");
+socket.emit("startQuiz",room);
+}
+
+socket.on("newQuestion",(q)=>{
+questionBox.innerText=q;
+
+answersBox.innerHTML="";
+
+["A","B","C","D"].forEach((l,i)=>{
+let b=document.createElement("div");
+b.className="quiz-btn";
+b.innerText=l;
+
+b.onclick=()=>{
+socket.emit("answer",{roomId:room,index:i});
+};
+
+answersBox.appendChild(b);
+});
+});
+
+// CHAT
+function sendChat(){
+let msg=chatInput.value.trim();
+if(!msg) return;
+
+socket.emit("chat",{roomId:room,msg,name:username});
+chatInput.value="";
+}
+
+socket.on("chat",(data)=>{
+let div=document.createElement("div");
+
+div.className="msg "+(data.name===username?"self":"other");
+
+div.innerHTML=`<b>${data.name}:</b> ${data.msg}`;
+
+chatBox.appendChild(div);
+chatBox.scrollTop=chatBox.scrollHeight;
+});
+
+</script>
+
+</body>
+</html>

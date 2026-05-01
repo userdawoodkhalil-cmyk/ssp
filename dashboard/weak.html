@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Weak Topics</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/theme.js"></script>
+
+<style>
+body { font-family: Arial; padding: 20px; }
+
+.card {
+    background: #f5f5f5;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.revise-btn { background: #ffc107; }
+.done-btn { background: #28a745; color: white; }
+
+</style>
+</head>
+<body>
+
+<h1>⚠️ Weak Topics</h1>
+<h3 id="count"></h3>
+
+<div id="weak-container"></div>
+
+<script type="module">
+import { db, doc, getDoc, setDoc } from "../assets/js/firebase.js";
+
+const user = localStorage.getItem("currentUser");
+if (!user) window.location.href = "../index.html";
+
+const userRef = doc(db, "users", user);
+
+async function loadWeakTopics() {
+    const snap = await getDoc(userRef);
+    const userData = snap.data() || {};
+    const weakTopics = userData.weakTopics || {};
+    const progress = userData.progress || {};
+
+    const container = document.getElementById("weak-container");
+    const countEl = document.getElementById("count");
+
+    container.innerHTML = "";
+
+    const keys = Object.keys(weakTopics);
+
+    countEl.textContent = "Total Weak Topics: " + keys.length;
+
+    if (keys.length === 0) {
+        container.innerHTML = "<h2>🎉 No weak topics! You are doing great!</h2>";
+        return;
+    }
+
+    keys.forEach(key => {
+        const topicName = weakTopics[key];
+
+        // Extract subject + chapter from key
+        const parts = key.split("-");
+        const subject = parts[0];
+        const chapter = parts[1];
+
+        const div = document.createElement("div");
+        div.className = "card";
+
+        div.innerHTML = `
+            <div>
+                <b>${topicName}</b><br>
+                <small>${subject} → ${chapter}</small>
+            </div>
+
+            <div>
+                <button class="revise-btn">Revise</button>
+                <button class="done-btn">Done</button>
+            </div>
+        `;
+
+        const reviseBtn = div.querySelector(".revise-btn");
+        const doneBtn = div.querySelector(".done-btn");
+
+        // 🔥 Revise button → open topic page
+        reviseBtn.onclick = () => {
+            window.location.href = `topics.html?subject=${encodeURIComponent(subject)}&chapter=${encodeURIComponent(chapter)}`;
+        };
+
+        // 🔥 Done button → remove from weak topics
+        doneBtn.onclick = async () => {
+            delete weakTopics[key];
+            progress[key] = true;
+
+            await setDoc(userRef, {
+                progress: progress,
+                weakTopics: weakTopics
+            });
+
+            div.remove();
+            countEl.textContent = "Total Weak Topics: " + Object.keys(weakTopics).length;
+        };
+
+        container.appendChild(div);
+    });
+}
+
+loadWeakTopics();
+</script>
+
+</body>
+</html>

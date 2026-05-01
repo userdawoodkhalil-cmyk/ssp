@@ -1,0 +1,13 @@
+{
+  "Physics": {
+    "Chapter 1": ["Topic 1", "Topic 2", "Topic 3"],
+    "Chapter 2": ["Topic 4", "Topic 5"]
+  },
+  "Chemistry": {
+    "Chapter 1": ["Topic 1", "Topic 2"],
+    "Chapter 2": ["Topic 3", "Topic 4"]
+  },
+  "Mathematics": {
+    "Chapter 1": ["Topic 1", "Topic 2", "Topic 3", "Topic 4"]
+  }
+}

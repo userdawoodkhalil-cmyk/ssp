@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Study Platform - Login/Register</title>
+
+<link rel="stylesheet" href="assets/css/style.css">
+
+<!-- Highlight.js -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+
+<style>
+body {
+  background: rgb(82, 101, 129);
+  font-family: Arial;
+  color: rgb(255, 255, 255);
+  text-align: center;
+}
+
+h1 {
+  
+ background-color: #000000;
+}
+
+h4{
+
+ margin-bottom: 40px;
+ background-color: #000000;
+ 
+}
+
+
+
+
+.container {
+  width: 370px;
+  margin: auto;
+  margin-top: 30px;
+  background: #000000;
+  padding: 20px;
+  border-radius: 25px;
+  border-color: #000000;
+
+      background: rgba(0, 0, 0, 0.1); /* transparent */
+     backdrop-filter: blur(10px); /* blur behind */
+      -webkit-backdrop-filter: blur(10px);
+
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 15px 40px rgba(255, 0, 0, 0.2);
+
+      color: rgb(255, 255, 255);
+      text-align: center;
+      vector-effect: fixed-position;
+
+}
+
+
+.container1 {
+  width: 370px;
+  margin: auto;
+  margin-top: 30px;
+  background: #000000;
+  padding: 20px;
+  border-radius: 25px;
+  border-color: #000000;
+
+      background: rgba(0, 0, 0, 0.1); /* transparent */
+     backdrop-filter: blur(10px); /* blur behind */
+      -webkit-backdrop-filter: blur(10px);
+
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 15px 40px rgba(255, 0, 0, 0.2);
+
+      color: rgb(255, 255, 255);
+      text-align: center;
+      
+
+}
+
+input {
+  width: 90%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  color: rgb(255, 255, 255);
+  background-color: rgb(42, 57, 85);
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  background: #3761a0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+
+
+
+
+
+</style>
+</head>
+
+<body>
+
+
+
+
+
+
+
+<div class="container">
+  <h2>Register</h2><br>
+  <input type="email" id="register-email" placeholder="Email"><br><br>
+  <input type="password" id="register-password" placeholder="Password"><br><br>
+  <button onclick="registerUser()">Register</button>
+</div>
+
+<script type="module">
+import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, db, doc, setDoc } from "./assets/js/firebase.js";
+
+// 🔹 Register
+async function register(email, password) {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    await setDoc(doc(db, "users", user.uid), {
+      progress: {},
+      weakTopics: {}
+    });
+
+    alert("✅ Registration successful! Please login.");
+  } catch (err) {
+    alert("❌ Registration failed: " + err.message);
+  }
+}
+
+
+
+// 🔹 Buttons
+window.registerUser = () => {
+  const email = document.getElementById("register-email").value.trim();
+  const password = document.getElementById("register-password").value.trim();
+  if (!email || !password) {
+    alert("Please fill all fields");
+    return;
+  }
+  register(email, password);
+};
+
+
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+
+</body>
+</html>
