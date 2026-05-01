@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Study Planner</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#0f172a;
+color:white;
+}
+
+.top{
+padding:15px;
+background:#020617;
+display:flex;
+justify-content:space-between;
+}
+
+.container{
+padding:20px;
+}
+
+input,button{
+padding:10px;
+margin:5px 0;
+border:none;
+border-radius:8px;
+}
+
+button{
+background:#38bdf8;
+cursor:pointer;
+}
+
+.plan{
+background:#1e293b;
+padding:15px;
+margin-top:10px;
+border-radius:10px;
+white-space:pre-wrap;
+}
+</style>
+</head>
+
+<body>
+
+<div class="top">
+<h2>🧠 AI Study Planner</h2>
+<button onclick="back()">⬅ Back</button>
+</div>
+
+<div class="container">
+
+<input id="topic" placeholder="Enter topic (e.g. Physics, Math)">
+<input id="hours" placeholder="Study hours per day (e.g. 2)">
+
+<button onclick="generate()">Generate Plan</button>
+
+<div id="result" class="plan"></div>
+
+</div>
+
+<script>
+
+function back(){
+window.location.href="index.html";
+}
+
+async function generate(){
+let topic=document.getElementById("topic").value;
+let hours=document.getElementById("hours").value;
+
+let prompt = `
+Create a simple daily study plan.
+Topic: ${topic}
+Study time per day: ${hours} hours
+Make it easy and structured (Day 1, Day 2...).
+`;
+
+let res = await fetch("http://localhost:3000/ask",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({message:prompt})
+});
+
+let data = await res.json();
+
+document.getElementById("result").innerText = data.reply;
+}
+
+</script>
+
+</body>
+</html>

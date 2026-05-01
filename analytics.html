@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Analytics</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<button id="themeToggle">🌙 Toggle Theme</button>
+<script src="../assets/js/theme.js"></script>
+<style>
+body { font-family: Arial; padding: 20px; }
+
+.card {
+    background: #f5f5f5;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 10px;
+}
+
+.bar-container {
+    background: #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 20px;
+    margin-top: 5px;
+}
+
+.bar {
+    height: 100%;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+}
+
+.good { background: #28a745; }
+.medium { background: #ffc107; }
+.bad { background: #dc3545; }
+</style>
+</head>
+<body>
+
+<h1>📊 Analytics Dashboard</h1>
+
+<div id="analytics-container"></div>
+
+<div id="overall" class="card"></div>
+
+<script type="module">
+import { db, doc, getDoc } from "../assets/js/firebase.js";
+
+// 🔐 Check login
+const user = localStorage.getItem("currentUser");
+if (!user) window.location.href = "../index.html";
+
+const userRef = doc(db, "users", user);
+
+async function loadAnalytics() {
+    try {
+        const [subjectsRes, userSnap] = await Promise.all([
+            fetch("../assets/data/subjects.json"),
+            getDoc(userRef)
+        ]);
+
+        const subjects = await subjectsRes.json();
+        const userData = userSnap.data() || {};
+
+        const progress = userData.progress || {};
+        const weakTopics = userData.weakTopics || {};
+
+        const container = document.getElementById("analytics-container");
+
+        let totalAll = 0;
+        let completedAll = 0;
+        let weakAll = Object.keys(weakTopics).length;
+
+        container.innerHTML = "";
+
+        Object.keys(subjects).forEach(subj => {
+            let total = 0;
+            let completed = 0;
+            let weak = 0;
+
+            Object.keys(subjects[subj]).forEach(chap => {
+                subjects[subj][chap].forEach((_, idx) => {
+                    total++;
+                    const key = `${subj}-${chap}-${idx}`;
+
+                    if (progress[key]) completed++;
+                    if (weakTopics[key]) weak++;
+                });
+            });
+
+            totalAll += total;
+            completedAll += completed;
+
+            const percent = total ? Math.round((completed / total) * 100) : 0;
+
+            let barClass = "bad";
+            if (percent >= 70) barClass = "good";
+            else if (percent >= 40) barClass = "medium";
+
+            const div = document.createElement("div");
+            div.className = "card";
+
+            div.innerHTML = `
+                <h3>${subj}</h3>
+                <p>Weak Topics: ${weak}</p>
+                <div class="bar-container">
+                    <div class="bar ${barClass}" style="width:${percent}%">
+                        ${percent}%
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(div);
+        });
+
+        // 🔥 Overall Stats
+        const overallPercent = totalAll ? Math.round((completedAll / totalAll) * 100) : 0;
+
+        let status = "❌ Needs Improvement";
+        if (overallPercent >= 70) status = "🔥 Excellent";
+        else if (overallPercent >= 40) status = "👍 Good";
+
+        document.getElementById("overall").innerHTML = `
+            <h2>📈 Overall Performance</h2>
+            <p>Total Progress: ${overallPercent}%</p>
+            <p>Total Weak Topics: ${weakAll}</p>
+            <h3>${status}</h3>
+        `;
+
+    } catch (err) {
+        console.error(err);
+        document.getElementById("analytics-container").innerHTML =
+            "<h2>❌ Error loading analytics</h2>";
+    }
+}
+
+// Start
+loadAnalytics();
+</script>
+
+</body>
+</html>

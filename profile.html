@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>User Profile</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/theme.js"></script>
+
+<style>
+body { font-family: Arial; padding: 20px; text-align: center; }
+
+.profile-card {
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 12px;
+    width: 300px;
+    margin: auto;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #28a745;
+    color: white;
+    font-size: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+}
+
+.stat {
+    margin: 10px 0;
+    padding: 10px;
+    background: #ddd;
+    border-radius: 8px;
+}
+</style>
+</head>
+<body>
+
+<h1>👤 User Profile</h1>
+
+<div class="profile-card">
+    <div class="avatar" id="avatar"></div>
+    <h2 id="username"></h2>
+
+    <div class="stat" id="streak"></div>
+    <div class="stat" id="progress"></div>
+    <div class="stat" id="weak"></div>
+</div>
+
+<script type="module">
+import { db, doc, getDoc } from "../assets/js/firebase.js";
+
+// 🔐 Check login
+const user = localStorage.getItem("currentUser");
+if (!user) window.location.href = "../index.html";
+
+async function loadProfile() {
+    try {
+        const [subjectsRes, userSnap] = await Promise.all([
+            fetch("../assets/data/subject.json"),
+            getDoc(doc(db, "users", user))
+        ]);
+
+        const subjects = await subjectsRes.json();
+        const userData = userSnap.data() || {};
+
+        const progress = userData.progress || {};
+        const weakTopics = userData.weakTopics || {};
+        const streak = userData.streak || 0;
+
+        // Username
+        document.getElementById("username").textContent = user;
+
+        // Avatar (first letter)
+        document.getElementById("avatar").textContent = user.charAt(0).toUpperCase();
+
+        // Calculate progress
+        let total = 0;
+        let completed = 0;
+
+        Object.keys(subjects).forEach(subj => {
+            Object.keys(subjects[subj]).forEach(chap => {
+                subjects[subj][chap].forEach((_, idx) => {
+                    total++;
+                    const key = `${subj}-${chap}-${idx}`;
+                    if (progress[key]) completed++;
+                });
+            });
+        });
+
+        const percent = total ? Math.round((completed / total) * 100) : 0;
+
+        // Show stats
+        document.getElementById("streak").innerHTML = `🔥 Streak: ${streak} days`;
+        document.getElementById("progress").innerHTML = `📊 Progress: ${percent}%`;
+        document.getElementById("weak").innerHTML = `⚠️ Weak Topics: ${Object.keys(weakTopics).length}`;
+
+    } catch (err) {
+        console.error(err);
+        document.body.innerHTML = "<h2>❌ Error loading profile</h2>";
+    }
+}
+
+// Start
+loadProfile();
+</script>
+
+</body>
+</html>
