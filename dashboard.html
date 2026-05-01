@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/theme.js"></script>
+
+<style>
+body{
+    background-color:white ;
+}
+
+h1{
+    text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="top-bar">
+    <h1>📚 Dashboard</h1>
+    <button id="themeToggle">🌙</button>
+</div>
+
+<div class="grid" id="cards"></div>
+
+<div class="grid">
+    <button onclick="go('analytics.html')">📊 Analytics</button>
+    <button onclick="go('weak.html')">⚠️ Weak</button>
+    <button onclick="go('revision.html')">🔄 Revision</button>
+    <button onclick="go('recommendation.html')">🤖 AI</button>
+    <button onclick="go('profile.html')">👤 Profile</button>
+    <button onclick="go('leaderboard.html')">🏆 Leaderboard</button>
+    <button onclick="go('reminder.html')">⏰ Reminder</button>
+    <button onclick="go('admin.html')">⏰ Admin</button>
+    <button onclick="window.location.href='ai-chat.html'">🤖 AI Teacher</button>
+    <button onclick="go('videos.html')">⏰ Video Learning</button>
+    <button onclick="go('planner.html')">🧠 Study Planner</button>
+    <button onclick="go('notes.html')">📝 Notes</button>
+    <button onclick="window.location.href='ai-school.html'">🏫 AI School</button>
+</div>
+
+<button onclick="logoutUser()">🚪 Logout</button>
+
+<script type="module">
+
+/* 🔊 LOGOUT SOUND (FIXED) */
+function playLogoutSound() {
+  const audio = new Audio("../assets/sounds/logout.mp3"); // make sure file exists here
+  audio.currentTime = 0;
+  audio.play().catch(() => {});
+}
+
+/* 🔓 LOGOUT */
+function logoutUser() {
+  playLogoutSound();
+
+  setTimeout(() => {
+    localStorage.removeItem("currentUser");
+    window.location.href = "../index.html";
+  }, 800); // delay so sound plays
+}
+
+window.logoutUser = logoutUser;
+
+
+/* (your existing beep kept untouched) */
+function playBeep() {
+  const audio = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+  audio.play();
+}
+
+import { db, doc, getDoc } from "../assets/js/firebase.js";
+
+const user = localStorage.getItem("currentUser");
+if (!user) window.location.href = "../index.html";
+
+window.go = (page) => window.location.href = page;
+
+async function loadDashboard() {
+    const container = document.getElementById("cards");
+
+    const [subjectsRes, userSnap] = await Promise.all([
+        fetch("../assets/data/subject.json"),
+        getDoc(doc(db, "users", user))
+    ]);
+
+    const subjects = await subjectsRes.json();
+    const progress = (userSnap.data() || {}).progress || {};
+
+    container.innerHTML = "";
+
+    Object.keys(subjects).forEach(subj => {
+        let total = 0, done = 0;
+
+        Object.keys(subjects[subj]).forEach(chap => {
+            subjects[subj][chap].forEach((_, i) => {
+                total++;
+                if (progress[`${subj}-${chap}-${i}`]) done++;
+            });
+        });
+
+        const percent = total ? Math.round((done/total)*100) : 0;
+
+        const div = document.createElement("div");
+        div.className = "card fade-in";
+
+        div.innerHTML = `
+            <h3>${subj}</h3>
+            <p>${percent}% Complete</p>
+            <button onclick="go('chapters.html?subject=${encodeURIComponent(subj)}')">
+                Open
+            </button>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+loadDashboard();
+</script>
+
+</body>
+</html>

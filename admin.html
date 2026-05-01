@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/theme.js"></script>
+
+<style>
+body { font-family: Arial; padding: 20px; }
+.card {
+    background: #f5f5f5;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+}
+button {
+    margin-left: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>⚙️ Admin Panel</h1>
+
+<div id="users"></div>
+
+<script type="module">
+import { db, collection, getDocs, deleteDoc, doc } from "../assets/js/firebase.js";
+
+// 🔐 Simple admin protection
+const user = localStorage.getItem("currentUser");
+if (user !== "admin") {
+    document.body.innerHTML = "<h2>❌ Access Denied</h2>";
+    throw new Error("Not admin");
+}
+
+async function loadUsers() {
+    const snap = await getDocs(collection(db, "users"));
+    const container = document.getElementById("users");
+
+    snap.forEach(userDoc => {
+        const div = document.createElement("div");
+        div.className = "card";
+
+        div.innerHTML = `
+            <b>${userDoc.id}</b>
+            <button onclick="deleteUser('${userDoc.id}')">Delete</button>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+// Delete user
+window.deleteUser = async (id) => {
+    if (confirm("Delete user?")) {
+        await deleteDoc(doc(db, "users", id));
+        location.reload();
+    }
+};
+
+loadUsers();
+</script>
+
+</body>
+</html>

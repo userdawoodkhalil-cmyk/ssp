@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Recommendation</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/theme.js"></script>
+
+<style>
+body { font-family: Arial; padding: 20px; }
+.card {
+    background: #f5f5f5;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 10px;
+}
+h2 { color: #333; }
+</style>
+</head>
+<body>
+
+<h1>🤖 AI Study Recommendation</h1>
+
+<div id="recommendation"></div>
+
+<script type="module">
+import { db, doc, getDoc } from "../assets/js/firebase.js";
+
+const user = localStorage.getItem("currentUser");
+if (!user) window.location.href = "../index.html";
+
+const container = document.getElementById("recommendation");
+
+async function loadRecommendations() {
+    const [subjectsRes, userSnap] = await Promise.all([
+        fetch("../assets/data/subject.json"),
+        getDoc(doc(db, "users", user))
+    ]);
+
+    const subjects = await subjectsRes.json();
+    const userData = userSnap.data() || {};
+
+    const progress = userData.progress || {};
+    const weakTopics = userData.weakTopics || {};
+
+    let subjectStats = [];
+
+    Object.keys(subjects).forEach(subj => {
+        let total = 0, completed = 0, weak = 0;
+
+        Object.keys(subjects[subj]).forEach(chap => {
+            subjects[subj][chap].forEach((_, idx) => {
+                total++;
+                const key = `${subj}-${chap}-${idx}`;
+
+                if (progress[key]) completed++;
+                if (weakTopics[key]) weak++;
+            });
+        });
+
+        const percent = total ? (completed / total) * 100 : 0;
+
+        subjectStats.push({
+            name: subj,
+            percent,
+            weak
+        });
+    });
+
+    // 🔥 Sort by weakest performance
+    subjectStats.sort((a, b) => {
+        if (b.weak !== a.weak) return b.weak - a.weak;
+        return a.percent - b.percent;
+    });
+
+    const weakest = subjectStats[0];
+
+    container.innerHTML = `
+        <div class="card">
+            <h2>📉 Weakest Subject</h2>
+            <p>${weakest.name}</p>
+        </div>
+
+        <div class="card">
+            <h2>⚠️ Weak Topics Count</h2>
+            <p>${weakest.weak}</p>
+        </div>
+
+        <div class="card">
+            <h2>📊 Completion</h2>
+            <p>${Math.round(weakest.percent)}%</p>
+        </div>
+
+        <div class="card">
+            <h2>🎯 Recommendation</h2>
+            <p>
+                Focus on <b>${weakest.name}</b><br>
+                Revise weak topics and complete remaining chapters.
+            </p>
+        </div>
+    `;
+}
+
+loadRecommendations();
+</script>
+
+</body>
+</html>

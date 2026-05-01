@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Teacher Pro</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI;}
+
+body{display:flex;height:100vh;background:#0f172a;color:white;}
+
+.sidebar{width:260px;background:#020617;padding:10px;overflow-y:auto;}
+.chat-item{padding:10px;margin:6px 0;background:#1e293b;border-radius:8px;cursor:pointer;}
+.new-btn{width:100%;padding:10px;margin-bottom:10px;background:#38bdf8;border:none;border-radius:8px;}
+
+.main{flex:1;display:flex;flex-direction:column;}
+#chatBox{flex:1;overflow-y:auto;padding:15px;}
+
+.msg{padding:12px;margin:10px 0;border-radius:10px;max-width:75%;white-space:pre-wrap;}
+.user{background:#38bdf8;color:black;margin-left:auto;}
+.ai{background:#1e293b;}
+
+pre{background:#020617;padding:10px;border-radius:10px;overflow:auto;}
+
+.inputArea{display:flex;padding:10px;background:#1e293b;}
+input{flex:1;padding:10px;border:none;border-radius:8px;}
+button{margin-left:5px;padding:10px;border:none;border-radius:8px;background:#38bdf8;cursor:pointer;}
+
+/* QUIZ */
+#quizPanel{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:#020617;
+padding:20px;
+border-radius:10px;
+width:420px;
+max-height:80vh;
+overflow:auto;
+display:none;
+}
+
+.quiz-option{
+background:#1e293b;
+padding:8px;
+margin:5px 0;
+cursor:pointer;
+border-radius:6px;
+}
+
+/* DASHBOARD */
+#dashboard{
+position:fixed;
+top:10px;
+right:10px;
+background:#020617;
+padding:10px;
+border-radius:10px;
+width:220px;
+font-size:14px;
+}
+
+#leaderboard{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:#020617;
+padding:20px;
+border-radius:10px;
+width:300px;
+display:none;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+<button class="new-btn" onclick="newChat()">+ New Chat</button>
+<div id="chatList"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+<div id="chatBox"></div>
+
+<div class="inputArea">
+<input id="msg" placeholder="Ask anything..." onkeydown="if(event.key==='Enter') send()">
+<button onclick="send()">Send</button>
+<button onclick="startVoice()">🎤</button>
+<input type="file" id="pdfFile" style="display:none">
+<button onclick="document.getElementById('pdfFile').click()">📄</button>
+<button onclick="generateQuiz()">📊 Quiz</button>
+</div>
+</div>
+
+<!-- QUIZ -->
+<div id="quizPanel"></div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+<h3>📊 Progress</h3>
+<div id="stats"></div>
+<button onclick="showLeaderboard()">🏆 Leaderboard</button>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="leaderboard">
+<h3>🏆 Leaderboard</h3>
+<div id="board"></div>
+<br>
+<button onclick="closeBoard()">Close</button>
+</div>
+
+<script>
+
+let chats = JSON.parse(localStorage.getItem("chats") || "{}");
+let currentChat = null;
+
+let quizData = [];
+let userAnswers = {};
+let quizHistory = JSON.parse(localStorage.getItem("quizHistory") || "[]");
+
+// ================= CHAT =================
+function save(){
+localStorage.setItem("chats", JSON.stringify(chats));
+}
+
+function newChat(){
+currentChat = Date.now().toString();
+chats[currentChat] = {messages:[]};
+save();
+renderList();
+document.getElementById("chatBox").innerHTML="";
+}
+
+function renderList(){
+let list=document.getElementById("chatList");
+list.innerHTML="";
+Object.keys(chats).forEach(id=>{
+let div=document.createElement("div");
+div.className="chat-item";
+div.innerText="Chat";
+div.onclick=()=>{currentChat=id;loadChat(id);};
+list.appendChild(div);
+});
+}
+
+function loadChat(id){
+let box=document.getElementById("chatBox");
+box.innerHTML="";
+chats[id].messages.forEach(m=>{
+addMsg(m.text,m.type,false);
+});
+}
+
+function addMsg(text,type,saveMsg=true){
+let box=document.getElementById("chatBox");
+let div=document.createElement("div");
+div.className="msg "+type;
+div.innerHTML=text;
+
+box.appendChild(div);
+box.scrollTop=box.scrollHeight;
+
+if(saveMsg){
+chats[currentChat].messages.push({text,type});
+save();
+}
+return div;
+}
+
+// ================= SEND =================
+async function send(){
+let text=document.getElementById("msg").value;
+if(!text) return;
+
+if(!currentChat) newChat();
+
+document.getElementById("msg").value="";
+
+addMsg(text,"user");
+let typing=addMsg("Typing...","ai");
+
+let history = chats[currentChat].messages.slice(-5);
+
+try{
+let res=await fetch("http://localhost:3000/ask",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({message:text,history})
+});
+
+let data=await res.json();
+typing.innerText=data.reply;
+
+chats[currentChat].messages.push({text:data.reply,type:"ai"});
+save();
+
+}catch{
+typing.innerText="❌ Server error";
+}
+}
+
+// ================= PDF =================
+document.getElementById("pdfFile").addEventListener("change", async function(){
+let file=this.files[0];
+let form=new FormData();
+form.append("file",file);
+
+addMsg("📄 Uploading PDF...","ai");
+
+let res=await fetch("http://localhost:3000/upload-pdf",{
+method:"POST",
+body:form
+});
+
+let data=await res.json();
+addMsg(data.reply,"ai");
+});
+
+// ================= QUIZ =================
+async function generateQuiz(){
+let res=await fetch("http://localhost:3000/generate-quiz",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({topic:""})
+});
+
+let data=await res.json();
+
+parseQuiz(data.quiz);
+renderQuiz();
+}
+
+function parseQuiz(text){
+quizData=[];
+userAnswers={};
+
+let blocks=text.split("Q");
+blocks.forEach(b=>{
+if(b.trim().length<10) return;
+
+let lines=b.split("\n").filter(l=>l.trim());
+let question=lines[0];
+let options=lines.slice(1,5);
+
+let ans=lines.find(l=>l.toLowerCase().includes("answer"));
+let correct=ans?ans.replace(/[^A-D]/g,""):"";
+
+quizData.push({question,options,correct});
+});
+}
+
+function renderQuiz(){
+let panel=document.getElementById("quizPanel");
+panel.style.display="block";
+
+let html="<h3>Quiz</h3>";
+
+quizData.forEach((q,i)=>{
+html+=`<p><b>Q${i+1}: ${q.question}</b></p>`;
+
+q.options.forEach((o,j)=>{
+let letter=["A","B","C","D"][j];
+html+=`<div class="quiz-option" onclick="selectAnswer(${i},'${letter}',this)">${o}</div>`;
+});
+
+html+="<hr>";
+});
+
+html+=`<button onclick="submitQuiz()">Submit</button>`;
+html+=`<button onclick="closeQuiz()">Close</button>`;
+
+panel.innerHTML=html;
+}
+
+function selectAnswer(i,a,el){
+userAnswers[i]=a;
+el.parentElement.querySelectorAll(".quiz-option").forEach(e=>e.style.background="#1e293b");
+el.style.background="#38bdf8";
+}
+
+function submitQuiz(){
+let score=0;
+
+quizData.forEach((q,i)=>{
+if(userAnswers[i]===q.correct) score++;
+});
+
+quizHistory.push({score,total:quizData.length,date:new Date().toLocaleString()});
+localStorage.setItem("quizHistory",JSON.stringify(quizHistory));
+
+updateStats();
+
+document.getElementById("quizPanel").innerHTML+=`<h2>🎯 Score: ${score}/${quizData.length}</h2>`;
+}
+
+// ================= DASHBOARD =================
+function updateStats(){
+let total=quizHistory.length;
+let sum=quizHistory.reduce((a,b)=>a+b.score,0);
+let best=quizHistory.reduce((a,b)=>Math.max(a,b.score),0);
+let avg=total?(sum/total).toFixed(1):0;
+
+document.getElementById("stats").innerHTML=`
+<p>📚 Quizzes: ${total}</p>
+<p>📈 Avg: ${avg}</p>
+<p>🏆 Best: ${best}</p>
+`;
+}
+
+function showLeaderboard(){
+document.getElementById("leaderboard").style.display="block";
+
+let sorted=[...quizHistory].sort((a,b)=>b.score-a.score);
+
+document.getElementById("board").innerHTML=sorted.map((q,i)=>
+`<p>#${i+1} - ${q.score}/${q.total}<br><small>${q.date}</small></p><hr>`
+).join("");
+}
+
+function closeBoard(){
+document.getElementById("leaderboard").style.display="none";
+}
+
+// ================= INIT =================
+window.onload=()=>{
+renderList();
+let keys=Object.keys(chats);
+if(keys.length){currentChat=keys[0];loadChat(currentChat);}
+else newChat();
+
+updateStats();
+};
+
+</script>
+
+</body>
+</html>
