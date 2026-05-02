@@ -24,7 +24,6 @@ let friends = {};
 // ===== SOCKET =====
 io.on("connection", (socket) => {
 
-  // ===== USER ONLINE =====
   socket.on("login", (name) => {
     users[socket.id] = { name, online: true };
     io.emit("onlineUsers", Object.values(users));
@@ -35,7 +34,6 @@ io.on("connection", (socket) => {
     io.emit("onlineUsers", Object.values(users));
   });
 
-  // ===== FRIEND SYSTEM =====
   socket.on("addFriend", (friendName) => {
     if (!friends[socket.id]) friends[socket.id] = [];
     friends[socket.id].push(friendName);
@@ -46,7 +44,6 @@ io.on("connection", (socket) => {
     socket.emit("friendList", friends[socket.id] || []);
   });
 
-  // ===== ROOM =====
   socket.on("createRoom", (name) => {
     const id = Math.random().toString(36).substr(2, 6);
 
@@ -70,18 +67,18 @@ io.on("connection", (socket) => {
     io.to(roomId).emit("playersUpdate", rooms[roomId].players);
   });
 
-  // ===== CHAT =====
   socket.on("chat", ({ roomId, msg, name }) => {
     io.to(roomId).emit("chat", { msg, name });
   });
 
-  // ===== QUIZ =====
   socket.on("startQuiz", async (roomId) => {
     if (!rooms[roomId]) return;
 
     let difficulty = "easy";
 
-    const avg = rooms[roomId].players.reduce((a,b)=>a+b.score,0) / rooms[roomId].players.length;
+    const avg =
+      rooms[roomId].players.reduce((a, b) => a + b.score, 0) /
+      rooms[roomId].players.length;
 
     if (avg > 100) difficulty = "hard";
     else if (avg > 50) difficulty = "medium";
@@ -89,7 +86,10 @@ io.on("connection", (socket) => {
     const completion = await groq.chat.completions.create({
       model: "llama-3.1-8b-instant",
       messages: [
-        { role: "system", content: `Make 1 ${difficulty} MCQ. Format: Question\nA)\nB)\nC)\nD)\nAnswer: (0-3)` },
+        {
+          role: "system",
+          content: `Make 1 ${difficulty} MCQ. Format: Question\nA)\nB)\nC)\nD)\nAnswer: (0-3)`
+        },
         { role: "user", content: "General knowledge" }
       ]
     });
@@ -140,5 +140,5 @@ app.post("/ask", async (req, res) => {
 });
 
 server.listen(3000, () => {
-  console.log("🚀 ULTRA PRO MAX running on http://localhost:3000");
+  console.log("🚀 Server running on http://localhost:3000");
 });
