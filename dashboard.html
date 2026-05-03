@@ -10,7 +10,7 @@
 <meta http-equiv="Expires" content="0" />
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/theme.js?v=1.0.1"></script>
 
 <style>
 
@@ -201,6 +201,14 @@ body::before {
 </div>
 
 <script>
+//cachee
+(function () {
+  const version = Date.now();
+  document.querySelectorAll("script[src]").forEach(s => {
+    s.src += "?v=" + version;
+  });
+})();
+
 /* NAV */
 window.go = (p) => window.location.href = p;
 
