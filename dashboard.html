@@ -180,7 +180,7 @@ body::before {
 
     <div class="stat-box">
       <h3>💡 Motivation</h3>
-      <p id="motivation">Loading...</p>
+      <p id="motivation"></p>
     </div>
   </div>
 
@@ -200,22 +200,41 @@ body::before {
 
 import { db, doc, getDoc } from "../assets/js/firebase.js";
 
-const user = localStorage.getItem("currentUser");
-if (!user) window.location.href = "../index.html";
+document.addEventListener("DOMContentLoaded", () => {
 
-/* ✅ IMPORTANT FIX — GLOBAL FUNCTIONS */
-window.go = function (p) {
-  window.location.href = p;
-};
+  const user = localStorage.getItem("currentUser");
+  if (!user) window.location.href = "../index.html";
 
-window.logoutUser = function () {
-  localStorage.removeItem("currentUser");
-  window.location.href = "../index.html";
-};
+  window.go = (p) => window.location.href = p;
 
-/* DASHBOARD LOAD SAFE */
-async function loadDashboard() {
-  try {
+  window.logoutUser = () => {
+    localStorage.removeItem("currentUser");
+    window.location.href = "../index.html";
+  };
+
+  /* MOTIVATION FIX */
+  const quotes = [
+    "Stay consistent 🔥",
+    "Small steps daily",
+    "You are improving",
+    "Success needs discipline"
+  ];
+
+  document.getElementById("motivation").innerText =
+    quotes[Math.floor(Math.random() * quotes.length)];
+
+  /* GREETING */
+  let h = new Date().getHours();
+  document.getElementById("greeting").innerText =
+    h < 12 ? "🌅 Good Morning" :
+    h < 18 ? "🌤️ Good Afternoon" : "🌙 Good Evening";
+
+  /* STREAK */
+  let streak = localStorage.getItem("streak") || 0;
+  document.getElementById("streak").innerText = streak + " days";
+
+  /* DASHBOARD LOAD */
+  async function loadDashboard() {
     const container = document.getElementById("cards");
 
     const [subjectsRes, userSnap] = await Promise.all([
@@ -246,41 +265,16 @@ async function loadDashboard() {
       div.innerHTML = `
         <h3>${subj}</h3>
         <p>${percent}% Complete</p>
-        <button onclick="go('chapters.html?subject=${encodeURIComponent(subj)}')">
-          Open
-        </button>
+        <button onclick="go('chapters.html?subject=${subj}')">Open</button>
       `;
 
       container.appendChild(div);
     });
-
-  } catch (e) {
-    console.log("Dashboard error:", e);
   }
-}
 
-loadDashboard();
+  loadDashboard();
 
-/* STREAK */
-let streak = localStorage.getItem("streak") || 0;
-document.getElementById("streak").innerText = streak + " days";
-
-/* MOTIVATION */
-const quotes = [
-  "Stay consistent 🔥",
-  "Small steps daily",
-  "You are improving",
-  "Success needs discipline"
-];
-
-document.getElementById("motivation").innerText =
-quotes[Math.floor(Math.random()*quotes.length)];
-
-/* GREETING */
-let h = new Date().getHours();
-document.getElementById("greeting").innerText =
-h < 12 ? "🌅 Good Morning" :
-h < 18 ? "🌤️ Good Afternoon" : "🌙 Good Evening";
+});
 
 </script>
 
