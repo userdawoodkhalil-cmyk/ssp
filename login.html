@@ -384,6 +384,7 @@ async function login(email, password) {
   }
 }
 
+
 window.registerUser = () => {
   const email = document.getElementById("register-email").value.trim();
   const password = document.getElementById("register-password").value.trim();
@@ -423,6 +424,24 @@ document.addEventListener("mousemove", (e) => {
   glow.style.left = e.clientX + "px";
   glow.style.top = e.clientY + "px";
 });
+
+//singup
+function signup() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  auth.createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+
+      db.collection("users").doc(userCredential.user.uid).set({
+        streak: 0,
+        lastLogin: null
+      });
+
+      window.location.href = "dashboard.html";
+    })
+    .catch(err => alert(err.message));
+}
 
 
 //own branding 
