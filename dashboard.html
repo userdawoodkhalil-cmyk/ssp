@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <title>Dashboard</title>
 
+<!-- CACHE BUSTER (IMPORTANT) -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 <script src="../assets/js/theme.js"></script>
 
@@ -31,7 +36,7 @@ body {
   overflow-x: hidden;
 }
 
-/* BACKGROUND */
+/* background */
 body::before {
   content: "";
   position: fixed;
@@ -42,7 +47,7 @@ body::before {
   z-index: -1;
 }
 
-/* SIDEBAR */
+/* sidebar */
 .sidebar {
   width: 250px;
   height: 100vh;
@@ -77,13 +82,13 @@ body::before {
   transform: translateX(6px);
 }
 
-/* MAIN */
+/* main */
 .main {
   flex: 1;
   padding: 30px;
 }
 
-/* TOP */
+/* top */
 .top-bar {
   display: flex;
   justify-content: space-between;
@@ -91,7 +96,7 @@ body::before {
   margin-bottom: 20px;
 }
 
-/* STATS */
+/* stats */
 .stats {
   display: grid;
   grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
@@ -107,7 +112,7 @@ body::before {
   border: 1px solid var(--stroke);
 }
 
-/* CARDS */
+/* cards */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
@@ -122,7 +127,7 @@ body::before {
   border: 1px solid var(--stroke);
 }
 
-/* ACTIONS */
+/* actions */
 .action-grid {
   margin-top: 25px;
   display: grid;
@@ -137,6 +142,7 @@ body::before {
   background: var(--glass);
   color: white;
   cursor: pointer;
+  transition: 0.3s;
 }
 
 .action-grid button:hover {
@@ -149,7 +155,6 @@ body::before {
 
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
   <h2>🚀 SSP</h2>
 
@@ -165,7 +170,6 @@ body::before {
   <button onclick="logoutUser()">🚪 Logout</button>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
   <div class="top-bar">
@@ -180,7 +184,7 @@ body::before {
 
     <div class="stat-box">
       <h3>💡 Motivation</h3>
-      <p id="motivation"></p>
+      <p id="motivation">Loading...</p>
     </div>
   </div>
 
@@ -190,91 +194,52 @@ body::before {
     <button onclick="go('videos.html')">🎥 Video Learning</button>
     <button onclick="go('planner.html')">🧠 Study Planner</button>
     <button onclick="go('notes.html')">📝 Notes</button>
-    <button onclick="window.location.href='ai-school.html'">🏫 AI School</button>
-    <button onclick="window.location.href='ai-chat.html'">🤖 AI Teacher</button>
+    <button onclick="go('ai-school.html')">🏫 AI School</button>
+    <button onclick="go('ai-chat.html')">🤖 AI Teacher</button>
   </div>
 
 </div>
 
-<script type="module">
+<script>
+/* NAV */
+window.go = (p) => window.location.href = p;
 
-import { db, doc, getDoc } from "../assets/js/firebase.js";
+/* LOGOUT */
+window.logoutUser = () => {
+  localStorage.removeItem("currentUser");
+  window.location.href = "../index.html";
+};
 
-document.addEventListener("DOMContentLoaded", () => {
+/* FIX MOTIVATION (NO FREEZE EVER) */
+const m = document.getElementById("motivation");
+const quotes = [
+  "Stay consistent 🔥",
+  "Small steps daily",
+  "You are improving",
+  "Success needs discipline"
+];
 
-  const user = localStorage.getItem("currentUser");
-  if (!user) window.location.href = "../index.html";
+if (m) {
+  m.innerText = quotes[Math.floor(Math.random() * quotes.length)];
+}
 
-  window.go = (p) => window.location.href = p;
+/* GREETING */
+const g = document.getElementById("greeting");
+let h = new Date().getHours();
 
-  window.logoutUser = () => {
-    localStorage.removeItem("currentUser");
-    window.location.href = "../index.html";
-  };
-
-  /* MOTIVATION FIX */
-  const quotes = [
-    "Stay consistent 🔥",
-    "Small steps daily",
-    "You are improving",
-    "Success needs discipline"
-  ];
-
-  document.getElementById("motivation").innerText =
-    quotes[Math.floor(Math.random() * quotes.length)];
-
-  /* GREETING */
-  let h = new Date().getHours();
-  document.getElementById("greeting").innerText =
+if (g) {
+  g.innerText =
     h < 12 ? "🌅 Good Morning" :
     h < 18 ? "🌤️ Good Afternoon" : "🌙 Good Evening";
+}
 
-  /* STREAK */
-  let streak = localStorage.getItem("streak") || 0;
-  document.getElementById("streak").innerText = streak + " days";
+/* STREAK SAFE */
+const s = document.getElementById("streak");
+let streak = localStorage.getItem("streak") || 0;
+if (s) s.innerText = streak + " days";
 
-  /* DASHBOARD LOAD */
-  async function loadDashboard() {
-    const container = document.getElementById("cards");
-
-    const [subjectsRes, userSnap] = await Promise.all([
-      fetch("../assets/data/subject.json"),
-      getDoc(doc(db, "users", user))
-    ]);
-
-    const subjects = await subjectsRes.json();
-    const progress = (userSnap.data() || {}).progress || {};
-
-    container.innerHTML = "";
-
-    Object.keys(subjects).forEach(subj => {
-      let total = 0, done = 0;
-
-      Object.keys(subjects[subj]).forEach(chap => {
-        subjects[subj][chap].forEach((_, i) => {
-          total++;
-          if (progress[`${subj}-${chap}-${i}`]) done++;
-        });
-      });
-
-      const percent = total ? Math.round((done / total) * 100) : 0;
-
-      const div = document.createElement("div");
-      div.className = "card";
-
-      div.innerHTML = `
-        <h3>${subj}</h3>
-        <p>${percent}% Complete</p>
-        <button onclick="go('chapters.html?subject=${subj}')">Open</button>
-      `;
-
-      container.appendChild(div);
-    });
-  }
-
-  loadDashboard();
-
-});
+/* TEST */
+console.log("Dashboard loaded ✔");
 
 </script>
 
