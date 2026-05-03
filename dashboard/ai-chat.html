@@ -192,7 +192,7 @@ let typing=addMsg("Typing...","ai");
 let history = chats[currentChat].messages.slice(-5);
 
 try{
-let res=await fetch("http://localhost:3000/ask",{
+let res=await fetch("https://ai-server-1-0j3h.onrender.com",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({message:text,history})

@@ -196,7 +196,7 @@ body::before {
 
 <body>
 
-<!-- SIDEBAR (UNCHANGED) -->
+<!-- SIDEBAR -->
 <div class="sidebar">
   <h2>🚀 SSP</h2>
 
@@ -219,7 +219,6 @@ body::before {
     <h1 id="greeting">👋 Welcome</h1>
   </div>
 
-  <!-- STATS -->
   <div class="stats">
     <div class="stat-box">
       <h3>🔥 Streak</h3>
@@ -232,10 +231,8 @@ body::before {
     </div>
   </div>
 
-  <!-- SUBJECTS -->
   <div class="grid" id="cards"></div>
 
-  <!-- ACTIONS -->
   <div class="action-grid">
     <button onclick="go('videos.html')">🎥 Video Learning</button>
     <button onclick="go('planner.html')">🧠 Study Planner</button>
@@ -244,14 +241,10 @@ body::before {
     <button onclick="window.location.href='ai-chat.html'">🤖 AI Teacher</button>
   </div>
 
-  <!-- 🤖 AI ASSISTANT -->
   <div class="ai-box">
     <h3>🤖 AI Study Assistant</h3>
-
     <input id="aiInput" placeholder="Ask anything...">
-
     <button onclick="askAI()">Ask AI</button>
-
     <div class="ai-answer" id="aiAnswer"></div>
   </div>
 
@@ -266,100 +259,100 @@ if (!user) window.location.href = "../index.html";
 
 window.go = (p) => window.location.href = p;
 
-/* LOGOUT */
 window.logoutUser = () => {
   localStorage.removeItem("currentUser");
   window.location.href = "../index.html";
 };
 
-/* DASHBOARD LOAD */
+/* DASHBOARD */
 async function loadDashboard() {
-  const container = document.getElementById("cards");
+  try {
+    const container = document.getElementById("cards");
 
-  const [subjectsRes, userSnap] = await Promise.all([
-    fetch("../assets/data/subject.json"),
-    getDoc(doc(db, "users", user))
-  ]);
+    const [subjectsRes, userSnap] = await Promise.all([
+      fetch("../assets/data/subject.json"),
+      getDoc(doc(db, "users", user))
+    ]);
 
-  const subjects = await subjectsRes.json();
-  const progress = (userSnap.data() || {}).progress || {};
+    const subjects = await subjectsRes.json();
+    const progress = (userSnap.data() || {}).progress || {};
 
-  Object.keys(subjects).forEach(subj => {
-    let total = 0, done = 0;
+    container.innerHTML = "";
 
-    Object.keys(subjects[subj]).forEach(chap => {
-      subjects[subj][chap].forEach((_, i) => {
-        total++;
-        if (progress[`${subj}-${chap}-${i}`]) done++;
+    Object.keys(subjects).forEach(subj => {
+      let total = 0, done = 0;
+
+      Object.keys(subjects[subj]).forEach(chap => {
+        subjects[subj][chap].forEach((_, i) => {
+          total++;
+          if (progress[`${subj}-${chap}-${i}`]) done++;
+        });
       });
+
+      const percent = total ? Math.round((done/total)*100) : 0;
+
+      const div = document.createElement("div");
+      div.className = "card";
+
+      div.innerHTML = `
+        <h3>${subj}</h3>
+        <p>${percent}% Complete</p>
+        <button onclick="go('chapters.html?subject=${subj}')">Open</button>
+      `;
+
+      container.appendChild(div);
     });
 
-    const percent = total ? Math.round((done/total)*100) : 0;
-
-    const div = document.createElement("div");
-    div.className = "card";
-
-    div.innerHTML = `
-      <h3>${subj}</h3>
-      <p>${percent}% Complete</p>
-      <button onclick="go('chapters.html?subject=${subj}')">Open</button>
-    `;
-
-    container.appendChild(div);
-  });
+  } catch (e) {
+    console.log("Dashboard error:", e);
+  }
 }
 
 loadDashboard();
 
 /* STREAK */
-let streak = localStorage.getItem("streak") || 0;
-document.getElementById("streak").innerText = streak + " days";
+try {
+  let streak = localStorage.getItem("streak") || 0;
+  document.getElementById("streak").innerText = streak + " days";
+} catch {}
 
 /* MOTIVATION */
-const quotes = [
-  "Stay consistent 🔥",
-  "Small steps daily",
-  "You are improving",
-  "Success needs discipline"
-];
-
-document.getElementById("motivation").innerText =
-quotes[Math.floor(Math.random()*quotes.length)];
+try {
+  const quotes = [
+    "Stay consistent 🔥",
+    "Small steps daily",
+    "You are improving",
+    "Success needs discipline"
+  ];
+  document.getElementById("motivation").innerText =
+    quotes[Math.floor(Math.random()*quotes.length)];
+} catch {}
 
 /* GREETING */
-let h = new Date().getHours();
-document.getElementById("greeting").innerText =
-h < 12 ? "🌅 Good Morning" :
-h < 18 ? "🌤️ Good Afternoon" : "🌙 Good Evening";
+try {
+  let h = new Date().getHours();
+  document.getElementById("greeting").innerText =
+    h < 12 ? "🌅 Good Morning" :
+    h < 18 ? "🌤️ Good Afternoon" : "🌙 Good Evening";
+} catch {}
 
-/* 🤖 AI FUNCTION */
+/* AI (SAFE DEMO) */
 window.askAI = async function () {
   const input = document.getElementById("aiInput").value;
   const output = document.getElementById("aiAnswer");
 
+  if (!input.trim()) return;
+
   output.innerText = "Thinking... 🤖";
 
   try {
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer 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"
-      },
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
-        messages: [
-          { role: "system", content: "You are a helpful student tutor." },
-          { role: "user", content: input }
-        ]
-      })
-    });
-
+    const res = await fetch("https://api.quotable.io/random");
     const data = await res.json();
-    output.innerText = data.choices[0].message.content;
 
-  } catch (e) {
-    output.innerText = "❌ Error connecting AI";
+    output.innerText = "💡 " + data.content;
+
+  } catch {
+    output.innerText = "⚠️ AI not connected yet";
   }
 };
 

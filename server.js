@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(express.static(__dirname));
 
 const groq = new Groq({
-  apiKey: "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"
+  apiKey: process.env.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
 });
 
 // ===== DATA =====
