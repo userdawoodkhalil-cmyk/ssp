@@ -4,7 +4,12 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Scholar – Pakistan Study Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<!-- Firebase App (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;600;700&family=Bebas+Neue&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 /* ══ RESET & ROOT ══ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -327,7 +332,19 @@ body{overflow:hidden}
 .note-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.1);transform:translateY(-1px)}
 .note-subject{font-size:10px;font-weight:500;padding:2px 8px;border-radius:99px;margin-bottom:6px;display:inline-block}
 .note-title{font-size:13px;font-weight:500;color:var(--t1);margin-bottom:5px}
-.note-preview{font-size:11px;color:var(--t2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-clamp: 2; /* 👈 add this line */overflow:hidden;}
+.note-preview{
+  font-size:11px;
+  color:var(--t2);
+  line-height:1.5;
+
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+
+  line-clamp: 2; /* 👈 add this line */
+
+  overflow:hidden;
+}
 
 /* ══ STUDY SESSIONS LOG ══ */
 .session-log-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg2);border-radius:var(--r);margin-bottom:6px}
@@ -509,6 +526,234 @@ body.dark .login-card,.modal{--bg:#1a1a1e;}
 /* ══ DARK MODE EXTRAS ══ */
 body.dark .theme-picker-panel{background:#252529}
 body.dark .focus-overlay{background:rgba(0,0,0,.97)}
+
+/* ══ BOLD BEAUTIFUL DASHBOARD TYPOGRAPHY ══ */
+
+/* Body default — Outfit, very readable & modern */
+html, body {
+  font-family: 'Outfit', sans-serif !important;
+}
+
+/* Greeting heading — Syne ExtraBold, big & punchy */
+#page-dashboard > div:first-child > div:first-child {
+  font-family: 'Syne', sans-serif !important;
+  font-size: 30px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.02em;
+  color: var(--t1);
+}
+#greetingText, #greetingName {
+  font-family: 'Syne', sans-serif !important;
+  font-style: normal !important;
+  font-weight: 800 !important;
+  color: var(--accent) !important;
+}
+
+/* Greeting subtitle */
+#greetingSub {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.01em;
+  color: var(--t2);
+  margin-top: 6px !important;
+}
+
+/* Stat values — Bebas Neue, tall & impactful */
+.stat-val {
+  font-family: 'Bebas Neue', sans-serif !important;
+  font-size: 34px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+/* Stat labels — Outfit bold uppercase */
+.stat-label {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Stat change */
+.stat-change {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+}
+
+/* Card titles — Syne Bold */
+.card-title {
+  font-family: 'Syne', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em;
+  color: var(--t1);
+}
+
+/* Card action links */
+.card-action {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+/* Page title (topbar) — Syne ExtraBold */
+.page-title {
+  font-family: 'Syne', sans-serif !important;
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.03em;
+}
+
+/* Logo — Syne */
+.logo-text {
+  font-family: 'Syne', sans-serif !important;
+  font-size: 21px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.03em;
+}
+
+/* Nav items — Outfit medium */
+.nav-item {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em;
+}
+
+/* Buttons — Outfit SemiBold */
+.btn {
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+}
+
+/* Study timer button */
+.study-timer-btn {
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 700 !important;
+}
+
+/* XP labels */
+.xp-label-row span {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+/* Pomodoro time — Bebas Neue, massive */
+.pomo-time {
+  font-family: 'Bebas Neue', sans-serif !important;
+  font-size: 52px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.04em;
+}
+
+/* Pomodoro stat values */
+.pomo-stat-val {
+  font-family: 'Bebas Neue', sans-serif !important;
+  font-size: 28px !important;
+  letter-spacing: 0.04em;
+}
+
+/* Leaderboard scores */
+.lb-pts {
+  font-family: 'Bebas Neue', sans-serif !important;
+  font-size: 17px !important;
+  letter-spacing: 0.04em;
+}
+.lb-name {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+/* Streak */
+#streakLabel {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+
+/* Tasks */
+.task-text {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+/* Schedule */
+.sched-title {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+.sched-time {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 10.5px !important;
+  font-weight: 500 !important;
+}
+
+/* Progress names */
+.prog-name {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+/* Modal titles */
+.modal-title {
+  font-family: 'Syne', sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em;
+}
+
+/* Section headings on pages */
+.nav-sec {
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em;
+}
+
+/* Course names */
+.course-name {
+  font-family: 'Syne', sans-serif !important;
+  font-weight: 700 !important;
+}
+
+/* Note titles */
+.note-title {
+  font-family: 'Syne', sans-serif !important;
+  font-weight: 700 !important;
+}
+
+/* Chip */
+.chip {
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 600 !important;
+}
+
+/* Login card */
+.login-logo {
+  font-family: 'Syne', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 28px !important;
+  letter-spacing: -0.03em;
+}
+
+/* Mobile adjustments */
+@media(max-width:640px){
+  #page-dashboard > div:first-child > div:first-child {
+    font-size: 24px !important;
+  }
+  .stat-val { font-size: 28px !important; }
+  .page-title { font-size: 17px !important; }
+  .pomo-time { font-size: 40px !important; }
+}
 
 /* ══ MOBILE ENHANCEMENTS ══ */
 @media(max-width:640px){
@@ -725,8 +970,14 @@ body.dark .focus-overlay{background:rgba(0,0,0,.97)}
     <div class="login-error" id="authError"></div>
 
     <div class="login-footer">
-      All your data is stored privately on this device.<br>
+      Your data is securely stored in the cloud &amp; syncs across devices.<br>
       Your progress, goals, and XP are unique to your account.
+    </div>
+    <!-- Real-time student counter -->
+    <div style="margin-top:14px;text-align:center;background:linear-gradient(135deg,#ede9ff,#e8f4ff);border-radius:12px;padding:13px 16px;border:1px solid rgba(92,78,232,.15)">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#534AB7;margin-bottom:5px">🎓 Scholar Community</div>
+      <div class="student-counter-val" style="font-size:34px;font-weight:700;color:#3730a3;font-family:'Bebas Neue',sans-serif;letter-spacing:.04em;line-height:1">—</div>
+      <div style="font-size:10px;color:#6b6a66;margin-top:3px">students registered · updates live</div>
     </div>
   </div>
 </div>
@@ -879,6 +1130,20 @@ body.dark .focus-overlay{background:rgba(0,0,0,.97)}
       </div>
     </div>
     <div class="g4" id="statsGrid"></div>
+
+    <!-- Live student counter banner -->
+    <div style="display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,var(--accent-l),#fff);border:.5px solid var(--b);border-radius:var(--rl);padding:14px 20px">
+      <div style="font-size:30px">🎓</div>
+      <div style="flex:1">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)">Scholar Community</div>
+        <div style="font-size:12px;color:var(--t2);margin-top:2px">Students learning on the platform</div>
+      </div>
+      <div style="text-align:right">
+        <div class="student-counter-val" style="font-size:36px;font-weight:700;color:var(--accent);font-family:'Bebas Neue',sans-serif;line-height:1">—</div>
+        <div style="font-size:10px;color:var(--t3)">registered · live</div>
+      </div>
+    </div>
+
     <div class="g2">
       <div class="card">
         <div class="card-header"><span class="card-title">Subject Progress</span><button class="card-action" onclick="navigate('analytics')">View analytics →</button></div>
@@ -1578,99 +1843,129 @@ const BUILTIN_NOTES = {
 };
 
 // ══════════════════════════════════════════════════════════════
-//   DATABASE (localStorage)
+//   FIREBASE INIT
 // ══════════════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyDquFouQQD6M4rYVFHWpfA8lDk8jbUC75g",
+  authDomain: "sspv2-b99bb.firebaseapp.com",
+  projectId: "sspv2-b99bb",
+  storageBucket: "sspv2-b99bb.firebasestorage.app",
+  messagingSenderId: "32594176582",
+  appId: "1:32594176582:web:49eddc196784da9001f847",
+  measurementId: "G-SK351WDFPN",
+  databaseURL: "https://sspv2-b99bb-default-rtdb.firebaseio.com"
+};
+firebase.initializeApp(firebaseConfig);
+const fbAuth = firebase.auth();
+const fbDB  = firebase.database();
+try { firebase.analytics(); } catch(e) {}
 
+// ══════════════════════════════════════════════════════════════
+//   DATABASE — Firebase Realtime Database
+// ══════════════════════════════════════════════════════════════
 const DB = {
-  getAllUsers() {
-    try { return JSON.parse(localStorage.getItem('scholar_users') || '{}'); } catch { return {}; }
+  _uid: null,
+  _cache: null,
+
+  setUID(uid) { this._uid = uid; this._cache = null; },
+  getUID() { return this._uid; },
+
+  getCurrentUserData() { return this._cache || {}; },
+
+  async loadUserData() {
+    if (!this._uid) return;
+    const snap = await fbDB.ref('users/' + this._uid).once('value');
+    this._cache = snap.val() || {};
   },
-  saveAllUsers(users) {
-    localStorage.setItem('scholar_users', JSON.stringify(users));
-  },
-  getUser(email) {
-    return this.getAllUsers()[email] || null;
-  },
-  saveUser(email, data) {
-    const users = this.getAllUsers();
-    users[email] = data;
-    this.saveAllUsers(users);
-  },
-  getCurrentEmail() {
-    return localStorage.getItem('scholar_current') || null;
-  },
-  setCurrentEmail(email) {
-    if (email) localStorage.setItem('scholar_current', email);
-    else localStorage.removeItem('scholar_current');
-  },
-  saveCurrentUserData(data) {
-    const email = this.getCurrentEmail();
-    if (!email) return;
-    const users = this.getAllUsers();
-    users[email] = { ...users[email], ...data };
-    this.saveAllUsers(users);
-  },
-  getCurrentUserData() {
-    const email = this.getCurrentEmail();
-    if (!email) return null;
-    return this.getUser(email);
-  },
+
   updatePath(pathStr, value) {
-    const email = this.getCurrentEmail();
-    if (!email) return;
-    const users = this.getAllUsers();
-    const user = users[email] || {};
-    const parts = pathStr.split('/').filter(Boolean);
-    let obj = user;
-    for (let i = 0; i < parts.length - 1; i++) {
-      if (!obj[parts[i]] || typeof obj[parts[i]] !== 'object') obj[parts[i]] = {};
-      obj = obj[parts[i]];
+    if (!this._uid) return;
+    // Update local cache immediately (keeps UI snappy)
+    if (this._cache) {
+      const parts = pathStr.split('/').filter(Boolean);
+      let obj = this._cache;
+      for (let i = 0; i < parts.length - 1; i++) {
+        if (!obj[parts[i]] || typeof obj[parts[i]] !== 'object') obj[parts[i]] = {};
+        obj = obj[parts[i]];
+      }
+      obj[parts[parts.length - 1]] = value;
     }
-    obj[parts[parts.length - 1]] = value;
-    users[email] = user;
-    this.saveAllUsers(users);
+    // Write to Firebase
+    fbDB.ref('users/' + this._uid + '/' + pathStr).set(value).catch(console.error);
   },
+
   getPath(pathStr) {
-    const data = this.getCurrentUserData();
-    if (!data) return undefined;
+    const data = this._cache || {};
     return pathStr.split('/').filter(Boolean).reduce((o, k) => (o && o[k] !== undefined ? o[k] : undefined), data);
   },
+
   pushToPath(pathStr, value) {
-    const email = this.getCurrentEmail();
-    if (!email) return null;
-    const users = this.getAllUsers();
-    const user = users[email] || {};
-    const parts = pathStr.split('/').filter(Boolean);
-    let obj = user;
-    for (let i = 0; i < parts.length; i++) {
-      if (!obj[parts[i]] || typeof obj[parts[i]] !== 'object') obj[parts[i]] = {};
-      obj = obj[parts[i]];
+    if (!this._uid) return null;
+    const newRef = fbDB.ref('users/' + this._uid + '/' + pathStr).push();
+    const key = newRef.key;
+    if (this._cache) {
+      const parts = pathStr.split('/').filter(Boolean);
+      let obj = this._cache;
+      for (let i = 0; i < parts.length; i++) {
+        if (!obj[parts[i]] || typeof obj[parts[i]] !== 'object') obj[parts[i]] = {};
+        obj = obj[parts[i]];
+      }
+      obj[key] = value;
     }
-    const key = 'k' + Date.now() + Math.random().toString(36).slice(2,7);
-    obj[key] = value;
-    users[email] = user;
-    this.saveAllUsers(users);
+    newRef.set(value).catch(console.error);
     return key;
   },
+
   removeFromPath(pathStr) {
-    const email = this.getCurrentEmail();
-    if (!email) return;
-    const users = this.getAllUsers();
-    const user = users[email] || {};
+    if (!this._uid) return;
     const parts = pathStr.split('/').filter(Boolean);
-    let obj = user;
-    for (let i = 0; i < parts.length - 1; i++) {
-      if (!obj[parts[i]]) return;
-      obj = obj[parts[i]];
+    if (this._cache) {
+      let obj = this._cache;
+      for (let i = 0; i < parts.length - 1; i++) {
+        if (!obj[parts[i]]) return;
+        obj = obj[parts[i]];
+      }
+      delete obj[parts[parts.length - 1]];
     }
-    delete obj[parts[parts.length - 1]];
-    users[email] = user;
-    this.saveAllUsers(users);
+    fbDB.ref('users/' + this._uid + '/' + pathStr).remove().catch(console.error);
+  },
+
+  async getAllUsers() {
+    const snap = await fbDB.ref('users').once('value');
+    return snap.val() || {};
+  },
+
+  getCurrentEmail() { return fbAuth.currentUser ? fbAuth.currentUser.email : null; },
+
+  // ── Real-time listener for live data sync ──
+  listenToUserData(callback) {
+    if (!this._uid) return;
+    fbDB.ref('users/' + this._uid).on('value', (snap) => {
+      this._cache = snap.val() || {};
+      if (callback) callback(this._cache);
+    });
+  },
+
+  stopListening() {
+    if (!this._uid) return;
+    fbDB.ref('users/' + this._uid).off();
   }
 };
 
 // ══════════════════════════════════════════════════════════════
-//   AUTH SYSTEM
+//   REAL-TIME STUDENT COUNTER
+// ══════════════════════════════════════════════════════════════
+function startStudentCountListener() {
+  fbDB.ref('meta/studentCount').on('value', (snap) => {
+    const count = snap.val() || 0;
+    document.querySelectorAll('.student-counter-val').forEach(el => {
+      el.textContent = count.toLocaleString();
+    });
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+//   AUTH SYSTEM — Firebase Auth
 // ══════════════════════════════════════════════════════════════
 
 let selectedRegColor = '#5C4EE8';
@@ -1822,7 +2117,7 @@ function createDefaultUserData(name, board, cls, color) {
   };
 }
 
-function handleAuth() {
+async function handleAuth() {
   const email = document.getElementById('authEmail').value.trim().toLowerCase();
   const password = document.getElementById('authPassword').value;
   const errEl = document.getElementById('authError');
@@ -1833,57 +2128,79 @@ function handleAuth() {
   if (!email.includes('@')) { errEl.textContent = 'Enter a valid email address'; return; }
   if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters'; return; }
 
+  btn.disabled = true;
+
   if (loginMode === 'register') {
     const name = document.getElementById('authName').value.trim();
     const board = document.getElementById('regBoard').value;
     const cls = document.getElementById('regClass').value;
-    if (!name) { errEl.textContent = 'Please enter your full name'; return; }
-    if (!board) { errEl.textContent = 'Please select your board'; return; }
-    if (!cls) { errEl.textContent = 'Please select your class'; return; }
-    if (DB.getUser(email)) { errEl.textContent = 'An account with this email already exists'; return; }
+    if (!name) { errEl.textContent = 'Please enter your full name'; btn.disabled = false; return; }
+    if (!board) { errEl.textContent = 'Please select your board'; btn.disabled = false; return; }
+    if (!cls) { errEl.textContent = 'Please select your class'; btn.disabled = false; return; }
 
-    btn.disabled = true; btn.textContent = 'Creating account…';
-    setTimeout(() => {
+    btn.textContent = 'Creating account…';
+    // Prevent onAuthStateChanged from launching app before data is written
+    window._registeringUser = true;
+    try {
+      const cred = await fbAuth.createUserWithEmailAndPassword(email, password);
+      const uid = cred.user.uid;
+      DB.setUID(uid);
+      // Build full user data with subjects, notes, flashcards
       const userData = createDefaultUserData(name, board, cls, selectedRegColor);
-      userData.auth = { email, password: btoa(password) }; // simple obfuscation
-      DB.saveUser(email, userData);
-      DB.setCurrentEmail(email);
+      // Write to Firebase and wait for it to complete
+      await fbDB.ref('users/' + uid).set(userData);
+      // Set cache immediately so UI works right away
+      DB._cache = userData;
+      // Increment student counter
+      await fbDB.ref('meta/studentCount').transaction(cur => (cur || 0) + 1);
+      window._registeringUser = false;
       btn.disabled = false;
-      showDashboard();
       toast('Welcome to Scholar, ' + name + '! 🎓', 'success');
-    }, 500);
+      launchApp();
+    } catch(e) {
+      window._registeringUser = false;
+      errEl.textContent = e.code === 'auth/email-already-in-use'
+        ? 'An account with this email already exists'
+        : (e.message || 'Registration failed');
+      btn.disabled = false; btn.textContent = 'Create Account';
+    }
 
   } else {
-    const user = DB.getUser(email);
-    if (!user) { errEl.textContent = 'No account found with this email'; return; }
-    if (!user.auth || atob(user.auth.password) !== password) { errEl.textContent = 'Incorrect password'; return; }
-    btn.disabled = true; btn.textContent = 'Signing in…';
-    setTimeout(() => {
-      DB.setCurrentEmail(email);
+    btn.textContent = 'Signing in…';
+    try {
+      const cred = await fbAuth.signInWithEmailAndPassword(email, password);
+      const uid = cred.user.uid;
+      DB.setUID(uid);
+      await DB.loadUserData();
       btn.disabled = false;
-      showDashboard();
-      toast('Welcome back, ' + (user.profile?.name || 'Scholar') + '! 👋', 'success');
-    }, 400);
+      toast('Welcome back, ' + (DB._cache?.profile?.name || 'Scholar') + '! 👋', 'success');
+      launchApp();
+    } catch(e) {
+      errEl.textContent = e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential'
+        ? 'Invalid email or password'
+        : e.code === 'auth/wrong-password' ? 'Incorrect password'
+        : (e.message || 'Sign in failed');
+      btn.disabled = false; btn.textContent = 'Sign In';
+    }
   }
 }
 
-function doSignOut() {
+async function doSignOut() {
   stopStudyTimer(false);
-  DB.setCurrentEmail(null);
+  DB.stopListening();
+  chartsDrawn = false;
+  window._registeringUser = false;
+  await fbAuth.signOut();
+  DB._cache = null;
   document.getElementById('appScreen').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('authEmail').value = '';
   document.getElementById('authPassword').value = '';
   document.getElementById('authError').textContent = '';
-  chartsDrawn = false;
   toast('Signed out successfully');
 }
 
-function showDashboard() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('appScreen').style.display = 'block';
-  initApp();
-}
+function showDashboard() { launchApp(); } // legacy alias
 
 // ══════════════════════════════════════════════════════════════
 //   APP STATE
@@ -1909,7 +2226,7 @@ const localNotifs = [
 ];
 
 // ── Data helpers ──
-function ud() { return DB.getCurrentUserData() || {}; }
+function ud() { return DB._cache || DB.getCurrentUserData() || {}; }
 function getSubjects() { return ud().subjects || {}; }
 function getTasks() { const t = ud().tasks || {}; return Object.entries(t).map(([k,v]) => ({...v, fbKey:k})); }
 function getAssignments() { const a = ud().assignments || {}; return Object.entries(a).map(([k,v]) => ({...v, fbKey:k})); }
@@ -1924,7 +2241,22 @@ function getUserSubjectList() { return Object.keys(getSubjects()); }
 //   INIT
 // ══════════════════════════════════════════════════════════════
 
+function launchApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+  chartsDrawn = false;
+  initApp();
+  // Live real-time sync
+  DB.listenToUserData((data) => {
+    // only re-render if app is visible
+    if (document.getElementById('appScreen').style.display !== 'none') {
+      renderAll();
+    }
+  });
+}
+
 function initApp() {
+  if (!DB._cache) { setTimeout(initApp, 80); return; }
   const data = ud();
   const profile = data.profile || {};
   const name = profile.name || 'Scholar';
@@ -3084,16 +3416,22 @@ function resetProgress() {
   toast('Progress reset', 'warning');
 }
 
-function deleteAccount() {
+async function deleteAccount() {
   if (!confirm('DELETE YOUR ACCOUNT? All data will be permanently erased. This cannot be undone.')) return;
-  if (!confirm('Are you absolutely sure? Type YES to confirm.')) return;
-  const email = DB.getCurrentEmail();
-  const users = DB.getAllUsers();
-  delete users[email];
-  DB.saveAllUsers(users);
-  DB.setCurrentEmail(null);
-  doSignOut();
-  toast('Account deleted');
+  if (!confirm('Are you absolutely sure? This cannot be undone.')) return;
+  const uid = DB.getUID();
+  try {
+    await fbDB.ref('users/' + uid).remove();
+    await fbDB.ref('meta/studentCount').transaction(cur => Math.max(0, (cur || 1) - 1));
+    await fbAuth.currentUser.delete();
+    toast('Account deleted');
+  } catch(e) {
+    if (e.code === 'auth/requires-recent-login') {
+      alert('Please sign out and sign back in before deleting your account.');
+    } else {
+      alert('Error: ' + e.message);
+    }
+  }
 }
 
 // ══ ANALYTICS ══
@@ -3185,8 +3523,8 @@ function drawCharts() {
 }
 
 // ══ LEADERBOARD ══
-function renderLeaderboard() {
-  const allUsers = DB.getAllUsers();
+async function renderLeaderboard() {
+  const allUsers = await DB.getAllUsers();
   const myEmail = DB.getCurrentEmail();
   const colors = ['#5C4EE8','#1D9E75','#D85A30','#BA7517','#185FA5','#A32D2D','#C2185B','#00796B'];
   const rows = Object.entries(allUsers).map(([email, data], ci) => {
@@ -3376,16 +3714,34 @@ function toggleDark() {
   DB.updatePath('settings/dark', isDark);
 }
 
-// ══ AUTO-LOGIN CHECK ══
+// ══ FIREBASE AUTH STATE OBSERVER + APP INIT ══
 window.addEventListener('DOMContentLoaded', () => {
   // Restore sidebar collapsed state
   if (localStorage.getItem('sidebarCollapsed') === 'true' && window.innerWidth > 640) {
     document.getElementById('sidebarEl')?.classList.add('collapsed');
   }
-  const email = DB.getCurrentEmail();
-  if (email && DB.getUser(email)) {
-    showDashboard();
-  }
+
+  // ── Firebase Auth observer: handles auto-login & sign-out ──
+  fbAuth.onAuthStateChanged(async (user) => {
+    if (user) {
+      // Skip if registration is in progress (handleAuth sets this flag)
+      if (window._registeringUser) return;
+      DB.setUID(user.uid);
+      await DB.loadUserData();
+      // If user has no data (brand new), wait — handleAuth will write data then call launchApp()
+      if (!DB._cache || Object.keys(DB._cache).length === 0) return;
+      launchApp();
+    } else {
+      DB.setUID(null);
+      DB._cache = null;
+      document.getElementById('appScreen').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+    }
+  });
+
+  // ── Start real-time student counter ──
+  startStudentCountListener();
+
   // Notification permission
   if (Notification?.permission === 'default') Notification.requestPermission();
   // Overlay close
