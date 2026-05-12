@@ -1,14 +1,23 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  GoogleAuthProvider,
+  signInWithPopup
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 
 // 🔥 Firebase Config
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyB21OWzYT4p_yHeqTLoQvWaKjZ3fC0cUtQ",
   authDomain: "study-platform-ff79d.firebaseapp.com",
@@ -19,17 +28,55 @@ const firebaseConfig = {
   measurementId: "G-V6Q7057B40"
 };
 
-// Firebase config (replace with yours)
 
-
-
-
-
-
-
-// Initialize Firebase
+// ✅ Initialize Firebase (ONLY ONCE)
 const app = initializeApp(firebaseConfig);
+
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-export { db, doc, setDoc, getDoc, auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut };
+
+// 🔥 Google Provider
+const provider = new GoogleAuthProvider();
+
+
+// ✅ Google Login
+async function signInWithGoogle() {
+  try {
+    const result = await signInWithPopup(auth, provider);
+
+    const user = result.user;
+
+    console.log("Google Login Success:", user);
+
+    await setDoc(
+      doc(db, "users", user.uid),
+      {
+        name: user.displayName,
+        email: user.email,
+        photo: user.photoURL
+      },
+      { merge: true }
+    );
+
+    window.location.replace("dashboard.html");
+
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
+  }
+}
+
+
+// ✅ EXPORTS
+export {
+  db,
+  doc,
+  setDoc,
+  getDoc,
+  auth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  signInWithGoogle
+};
