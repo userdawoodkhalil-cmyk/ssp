@@ -806,7 +806,7 @@ animateFull();
       showMsg('login-msg', `Welcome back, ${cred.user.email}!`, 'success');
       // ✅ Redirect after login:
          // setTimeout(() => window.location.href = '/dashboard.html', 1200);
-      setTimeout(() => window.location.href = '/dashboard.html', 1200);
+      setTimeout(() => window.location.href = ',/dashboard.html', 1200);
     } catch (err) {
       showMsg('login-msg', friendlyError(err.code));
     } finally {
@@ -838,7 +838,7 @@ animateFull();
       showMsg('reg-msg', 'Account created! Redirecting…', 'success');
       // ✅ Redirect after registration:
       // setTimeout(() => window.location.href = '/dashboard.html', 1200);
-      setTimeout(() => window.location.href = '/home.html', 1200);
+      setTimeout(() => window.location.href = './dashboard.html', 1200);
     } catch (err) {
       showMsg('reg-msg', friendlyError(err.code));
     } finally {
